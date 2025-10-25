@@ -448,18 +448,31 @@ inline void write_uint32(void* base, size_t offset, uint32_t value) {
     *p = value;
 }
 
-// Global / file-scope variable you can change at runtime.
-// Default is 400 ms. Update this int anywhere to change the interval.
-static int gay2000 = 85; // default 400 ms
+static int gay2000 = 95;
+static int minInterval = 75;
+static int maxInterval = 135;
+
+static int getRandomInterval() {
+    static unsigned int seed = time(NULL);
+    seed = seed * 1103515245 + 12345;
+    return minInterval + (seed % (maxInterval - minInterval + 1));
+}
+
+static float getRandomOffset() {
+    static unsigned int seed = time(NULL) + 1;
+    seed = seed * 1103515245 + 12345;
+    return ((seed % 100) / 1000.0f) - 0.05f;
+}
 
 void StartTakeDamage(void* ClosestEnemy) {
     if (ClosestEnemy == nullptr || !Aimbot) return;
 
     void* trandau = Curent_Match();
+    if (!trandau) return;
+    
     void* LocalPlayer = GetLocalPlayer(trandau);
     if (!LocalPlayer) return;
 
-    // obtain damagePacket (if your game requires this refresh)
     auto damagePacket = (message_C2S_RUDP_TakeDamage_Req_o2*)((void* (*)(void*))offset_PNGAJBCPDNJ)(LocalPlayer);
     if (!damagePacket) return;
 
@@ -472,10 +485,11 @@ void StartTakeDamage(void* ClosestEnemy) {
     void* WeaponHand = GetWeaponOnHand1(LocalPlayer);
     if (!WeaponHand) return;
 
-    // read static values once per call (you can update dynamic ones inside the loop)
     PlayerID PlayerID2 = *(PlayerID*)((uintptr_t)LocalPlayer + offset_KFMGKCJMCAM);
     PlayerID playerID_Enemy = *(PlayerID*)((uintptr_t)ClosestEnemy + offset_KFMGKCJMCAM);
     int baseDamage = *(int*)((uintptr_t)WeaponHand + offset_BaseDamage);
+    if (baseDamage <= 0) return;
+    
     int weaponID = GetWeapon(WeaponHand);
     void* objectPool = *(void**)((uintptr_t)LocalPlayer + offset_GEGFCFDGGGP);
     if (!objectPool) return;
@@ -483,62 +497,60 @@ void StartTakeDamage(void* ClosestEnemy) {
     static bool s_Il2CppMethodIntialized = false;
     if (!s_Il2CppMethodIntialized) {
         ((void (*)(void*, void*))offset_SetStartDamage)(WeaponHand, objectPool);
-        ((void* (*)(void*))offset_PNGAJBCPDNJ)(LocalPlayer); // optional refresh
+        ((void* (*)(void*))offset_PNGAJBCPDNJ)(LocalPlayer);
         s_Il2CppMethodIntialized = true;
     }
 
     Save::DamageInfo = DamageInfo;
     if (Save::DamageInfo == nullptr) return;
 
-    // Fill DamageInfo (keep as you had it; change values if you want)
-    write_int(Save::DamageInfo, 0x14, 1);              // isCritical flag (set to 0 if you don't want crit)
-    write_int(Save::DamageInfo, 0x10, baseDamage);     // damage value
-    write_ptr(Save::DamageInfo, 0x40, WeaponHand);     // weapon pointer
-    write_int(Save::DamageInfo, 0x48, weaponID);       // weapon ID
+    write_int(Save::DamageInfo, 0x14, 1);
+    write_int(Save::DamageInfo, 0x10, baseDamage);
+    write_ptr(Save::DamageInfo, 0x40, WeaponHand);
+    write_int(Save::DamageInfo, 0x48, weaponID);
 
     void* headCollider = GetHeadCollider(ClosestEnemy);
     if (!headCollider) return;
 
-    // Fill objectPool fields
     write_ptr(objectPool, offset_JMKMBNIBFNA, get_gameObject(headCollider));
     write_ptr(objectPool, offset_GHACJPMCEDK, headCollider);
     write_int(objectPool, offset_OJKBBAOPPIN, 1);
 
     void* sl3 = GKHECDLGAJA(LocalPlayer, objectPool);
+    if (!sl3) return;
+    
     monoList<float*>* paramCheck = LCLHHHKFCFP(WeaponHand, sl3, headCollider, false, (DamageInfo2_o*)Save::DamageInfo);
 
     GCommon_TimeService_o* GameSimulation = (GCommon_TimeService_o*)CurrentGameSimulationTimer();
     if (!GameSimulation || !paramCheck) return;
 
-    // Rate-limiter: deal damage every 'gay2000' milliseconds while conditions hold
-    // lastTime is initialized to the past so the first hit can occur immediately.
     static auto lastTime = std::chrono::steady_clock::now() - std::chrono::milliseconds(1000);
+    static int lastInterval = getRandomInterval();
 
     if (isEnemyInRangeWeapon(LocalPlayer, ClosestEnemy, WeaponHand)) {
         auto now = std::chrono::steady_clock::now();
-        // Use the current value of gay2000 (can be changed at runtime)
-        int interval_ms = gay2000 > 0 ? gay2000 : 1; // prevent non-positive interval
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTime).count();
 
-        if (elapsed >= interval_ms) {
-            // Recompute positions in case they moved
+        if (elapsed >= lastInterval) {
             Vector3 firePos = GetHeadPosition(LocalPlayer);
-            Vector3 hitPos  = GetHeadPosition(ClosestEnemy);
+            Vector3 hitPos = GetHeadPosition(ClosestEnemy);
+            
+            hitPos.x += getRandomOffset();
+            hitPos.y += getRandomOffset();
+            hitPos.z += getRandomOffset();
 
-            // Call damage
             TakeDamage(ClosestEnemy, baseDamage, PlayerID2,
                        (DamageInfo2_o*)Save::DamageInfo, weaponID,
                        firePos, hitPos, paramCheck, nullptr, 0);
 
-            // Optional: trigger firing animation/effects
             StartonFiring(LocalPlayer, WeaponHand);
 
-            // Update lastTime
             lastTime = now;
+            lastInterval = getRandomInterval();
         }
     } else {
-        // If enemy out of range, reset timer so next re-entry hits immediately (optional)
         lastTime = std::chrono::steady_clock::now() - std::chrono::milliseconds(1000);
+        lastInterval = getRandomInterval();
     }
 }
 void StartAimKillSend(void* ClosestEnemy) {
