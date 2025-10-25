@@ -29,7 +29,7 @@ typedef char PACKAGENAME;
 // Khai Báo
 
 #define ICON_FA_TELEGRAM "\xef\x8b\x86" // U+f2c6
-#define ICON_FA_EXCLAMATION_TRIANGLE "\xef\x81\xb1" 
+#define ICON_FA_SHIELD "\xef\x84\xb2" // U+f132 - Shield/Warrior icon 
 
 float density = -1;
 struct cfg {
@@ -702,7 +702,7 @@ inline void DrawESP(float screenWidth, float screenHeight) {
                          if(get_IsDieing(closestEnemy)) {
                             draw->AddLine(ImVec2(screenWidth / 2, 80), ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35), ImColor(255, 0, 0), 1.7);
                           } else {
-                            draw->AddLine(ImVec2(screenWidth / 2, 80), ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35), ImColor(255, 255, 255), 1.7);
+                            draw->AddLine(ImVec2(screenWidth / 2, 80), ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35), ImColor(200, 0, 255), 1.7);
                         }
                         
                         }
@@ -726,7 +726,7 @@ inline void DrawESP(float screenWidth, float screenHeight) {
         );
     } else {
         // Full box for alive enemies
-        ImColor color = ImColor(255, 255, 255); // White color
+        ImColor color = ImColor(200, 0, 255); // Purple color
         float thickness = visual_esp_boxth;
 
         draw->AddRect(
@@ -824,78 +824,36 @@ inline void DrawESP(float screenWidth, float screenHeight) {
  
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
 
-    // The text to be displayed
     std::string topText = " TOTAL ENEMIES - ";
     std::string enemiesCount = std::to_string(totalEnemies);
     std::string fullText = topText + enemiesCount + " ";
 
-    // The icon string
-    std::string icon = ICON_FA_EXCLAMATION_TRIANGLE " ";
+    std::string icon = ICON_FA_SHIELD " ";
 
-    // Calculate the size of the main text
     ImVec2 topTextSize = ImGui::CalcTextSize(fullText.c_str());
-
-    // Calculate the size of the icon (we'll use this for positioning)
     ImVec2 iconSize = ImGui::CalcTextSize(icon.c_str());
 
-    // Add extra padding to increase the space around the text
-    float horizontalPadding = 10.0f; 
-    float verticalPadding = 15.0f;
+    float horizontalPadding = 8.0f; 
+    float verticalPadding = 10.0f;
 
-    // Calculate the total width of the text and two icons, including padding
     float totalWidth = (iconSize.x * 2) + topTextSize.x + (horizontalPadding * 2);
-
-    // Calculate the starting position for the entire block
     ImVec2 entireBlockPos(g_GlWidth / 2.0f - totalWidth / 2.0f, 65);
 
-    // Background rectangle, positioned only behind the text with extra padding
-    ImVec2 backgroundStart(entireBlockPos.x + iconSize.x + (horizontalPadding / 2), entireBlockPos.y - verticalPadding);
-    ImVec2 backgroundEnd(entireBlockPos.x + iconSize.x + topTextSize.x + (horizontalPadding * 1.5f), entireBlockPos.y + topTextSize.y + verticalPadding);
-//    draw->AddRectFilled(backgroundStart, backgroundEnd, ImColor(250, 0, 0, 200), 6.0f);
-    
-    
-//   ImVec2 topTextSize = ImGui::CalcTextSize(topText.c_str());
     ImVec2 topTextPos(g_GlWidth / 2.0f - topTextSize.x / 2.0f, 65);
-    //auto draw = ImGui::GetBackgroundDrawList();
 
-    // Background rectangle
     draw->AddRectFilled(ImVec2(topTextPos.x - 5, topTextPos.y - 5), 
     ImVec2(topTextPos.x + topTextSize.x + 5, topTextPos.y + topTextSize.y + 8), 
     ImColor(220, 4, 5, 200), 3.0f);
     
-    // Draw the left icon in yellow
-    draw->AddText(NULL, 30.0f, entireBlockPos, ImColor(255, 255, 0, 255), icon.c_str());
+    draw->AddText(NULL, 25.0f, entireBlockPos, ImColor(220, 4, 5, 255), icon.c_str());
 
-    // Draw the gradient text
     float xPos = entireBlockPos.x + iconSize.x + horizontalPadding;
-    static float time = 0.0f;
-    time += ImGui::GetIO().DeltaTime * 2.0f;
+    draw->AddText(NULL, 25.0f, ImVec2(xPos, entireBlockPos.y), ImColor(255, 255, 255, 255), fullText.c_str());
 
-    const char* gradientText = topText.c_str();
-    for (int i = 0; gradientText[i] != '\0'; i++) {
-        char currentChar[2] = { gradientText[i], '\0' };
-        float hue = (float)i / strlen(gradientText) + time;
-        ImVec4 color = ImVec4(
-            sinf(hue * 2.0f) * 0.5f + 0.5f,
-            sinf(hue * 3.0f) * 0.5f + 0.5f,
-            sinf(hue * 4.0f) * 0.5f + 0.5f,
-            1.0f
-        );
-        draw->AddText(NULL, 30.0f, ImVec2(xPos, entireBlockPos.y), ImColor(255, 255, 255), currentChar);
-        xPos += ImGui::CalcTextSize(currentChar).x;
-    }
+    xPos += ImGui::CalcTextSize(fullText.c_str()).x;
+    xPos += horizontalPadding + 3.0f;
 
-    // Draw the enemy count with a solid color (white in this case)
-    draw->AddText(NULL, 30.0f, ImVec2(xPos, entireBlockPos.y), ImColor(255, 255, 255), enemiesCount.c_str());
-
-    // Update the position for the next element
-    xPos += ImGui::CalcTextSize(enemiesCount.c_str()).x;
-
-    // Add extra horizontal padding to the right icon's position
-    xPos += horizontalPadding;
-
-    // Draw the right icon in yellow
-    draw->AddText(NULL, 30.0f, ImVec2(xPos, entireBlockPos.y), ImColor(255, 255, 0, 255), icon.c_str());
+    draw->AddText(NULL, 25.0f, ImVec2(xPos, entireBlockPos.y), ImColor(220, 4, 5, 255), icon.c_str());
 }
 
 
