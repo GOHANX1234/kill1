@@ -71,7 +71,11 @@ bool health = false;
 bool Headshot = false;
 bool AimNewF = true;
 //int showline = 0;
-
+struct MassKill {
+float Sucks1 = 10.0f;
+bool Sucks = false;
+float FrontOffset = 0.5f;
+}Mass;
 
 bool ActiveFeature = true;
 
@@ -242,6 +246,8 @@ void DrawHealths(Rect box, float entityHealth, float maxHealth, int TeamID, cons
 }
 
 static float SetFieldOfView = 0, GetFieldOfView = 0;
+
+
 
 float (*get_deltaTime)();
 float smoothSpeedAIM = 5; 
@@ -697,7 +703,29 @@ inline void DrawESP(float screenWidth, float screenHeight) {
                         float Height = abs(HeadPosition.y - Toeposi.y) * (1.2 / 1.1);
                         float Width = Height * 0.50f;
                         Rect rect = Rect(HeadPosition.x - Width / 2.f, screenHeight - HeadPosition.y, Width, Height);
+if (Mass.Sucks) {
+    if (closestEnemy != NULL && local_player != NULL && closestEnemy != local_player && !get_IsDieing(closestEnemy)) {
+        void* playerTransform = Component_GetTransform(local_player);
+        void* enemyTransform  = Component_GetTransform(closestEnemy);
 
+        if (playerTransform != NULL && enemyTransform != NULL) {
+            Vector3 LocalPlayerPos = Transform_GetPosition(playerTransform);
+            Vector3 EnemyPos       = Transform_GetPosition(enemyTransform);
+
+            float distance = Vector3::Distance(LocalPlayerPos, EnemyPos);
+
+            if (distance <= Mass.Sucks1) {
+                Vector3 forward = GetForward(playerTransform);
+                Vector3 newPos  = LocalPlayerPos + (forward * Mass.FrontOffset);
+
+                // Optional: Validate newPos sanity
+                if (isfinite(newPos.x) && isfinite(newPos.y) && isfinite(newPos.z)) {
+                    Transform_INTERNAL_SetPosition(enemyTransform, Vvector3(newPos.x, newPos.y, newPos.z));
+                }
+            }
+        }
+    }
+}
                         if (Config.ESP.Line) {
                          if(get_IsDieing(closestEnemy)) {
                             draw->AddLine(ImVec2(screenWidth / 2, 80), ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35), ImColor(255, 0, 0), 1.7);
@@ -851,7 +879,7 @@ inline void DrawESP(float screenWidth, float screenHeight) {
     draw->AddText(NULL, 25.0f, ImVec2(xPos, entireBlockPos.y), ImColor(255, 255, 255, 255), fullText.c_str());
 
     xPos += ImGui::CalcTextSize(fullText.c_str()).x;
-    xPos += horizontalPadding + 3.0f;
+    xPos += horizontalPadding + 7.0f;
 
     draw->AddText(NULL, 25.0f, ImVec2(xPos, entireBlockPos.y), ImColor(220, 4, 5, 255), icon.c_str());
 }
