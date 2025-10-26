@@ -778,40 +778,9 @@ void StartAimKillSend3(void* ClosestEnemy) {
         GameFacade_Send(106, damagePacket, 2, 0); // 106 = take damage (your code)
     }
 }
-bool SpeedHack;
-void UpdateSpeedhack() {
-    void* COW_GameFacade_TypeInfo = *(void**)getAddressIL2CPP(0xB023498);
-    if (COW_GameFacade_TypeInfo)
-    {
-        void* COW_GameFacade_TypeInfo_Fields = *(void**)((uintptr_t)COW_GameFacade_TypeInfo + 0xB8);
-        if (COW_GameFacade_TypeInfo_Fields)
-        {
-            void* CurrentMatchGame = *(void**)((uintptr_t)COW_GameFacade_TypeInfo_Fields + 0x8);
-            if (CurrentMatchGame)
-            {
-                auto TimeService = *(void**)((uintptr_t)CurrentMatchGame + 0x20);
-                if (TimeService != nullptr)
-                {
-                    auto Time2 = *(float*)((uintptr_t)TimeService + 0x2c);
-                    if (SpeedHack)
-                    {
-                        if (Time2 != 0.065f)
-                        {
-                            *(float*)((uintptr_t)TimeService + 0x2c) = 0.065f;
-                        }
+bool SpeedHack = false;
 
-                    }
-                    else {
-                        if (Time2 != 0.033f)
-                        {
-                            *(float*)((uintptr_t)TimeService + 0x2c) = 0.033f;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+
 /*
 
 

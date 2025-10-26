@@ -399,6 +399,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 case TouchPhase::Stationary:
                         io.MousePos = ImVec2(touch.m_Position.fields.x, reverseY);
                         io.MouseDown[0] = true;
+                        
                         break;
                 case TouchPhase::Ended:
                 case TouchPhase::Canceled:
@@ -499,7 +500,8 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
             case 2:
                 StyledCheckbox(" AIMKILL", &AimKill1);
                 ImGui::Spacing();
-                StyledCheckbox(" SPEED 50x", &SpeedHack);
+                
+                 StyledCheckbox(" MassKill", &Mass.Sucks);
                 ImGui::Spacing();
                 break;
             case 3:
@@ -583,7 +585,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
 }
 //}
 typedef unsigned long DWORD;
-static uintptr_t libBase;
+//static uintptr_t libBase;
 
 uintptr_t string2Offset(const char *c) {
     int base = 16;
