@@ -524,33 +524,55 @@ void StartTakeDamage(void* ClosestEnemy) {
     GCommon_TimeService_o* GameSimulation = (GCommon_TimeService_o*)CurrentGameSimulationTimer();
     if (!GameSimulation || !paramCheck) return;
 
-    static auto lastTime = std::chrono::steady_clock::now() - std::chrono::milliseconds(1000);
-    static int lastInterval = getRandomInterval();
+    static auto burstStartTime = std::chrono::steady_clock::now();
+    static auto lastDamageTime = std::chrono::steady_clock::now() - std::chrono::milliseconds(1000);
+    static bool isFiring = false;
+    static int damageInterval = getRandomInterval();
 
     if (isEnemyInRangeWeapon(LocalPlayer, ClosestEnemy, WeaponHand)) {
         auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTime).count();
+        auto burstElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - burstStartTime).count();
+        auto damageElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastDamageTime).count();
 
-        if (elapsed >= lastInterval) {
-            Vector3 firePos = GetHeadPosition(LocalPlayer);
-            Vector3 hitPos = GetHeadPosition(ClosestEnemy);
-            
-            hitPos.x += getRandomOffset();
-            hitPos.y += getRandomOffset();
-            hitPos.z += getRandomOffset();
+        if (!isFiring) {
+            if (burstElapsed >= 500) {
+                isFiring = true;
+                burstStartTime = now;
+            }
+        } else {
+            if (burstElapsed >= 1000) {
+                isFiring = false;
+                burstStartTime = now;
+                StopFire1(LocalPlayer, WeaponHand);
+            } else {
+                if (damageElapsed >= damageInterval) {
+                    Vector3 firePos = GetHeadPosition(LocalPlayer);
+                    Vector3 hitPos = GetHeadPosition(ClosestEnemy);
+                    
+                    hitPos.x += getRandomOffset();
+                    hitPos.y += getRandomOffset();
+                    hitPos.z += getRandomOffset();
 
-            TakeDamage(ClosestEnemy, baseDamage, PlayerID2,
-                       (DamageInfo2_o*)Save::DamageInfo, weaponID,
-                       firePos, hitPos, paramCheck, nullptr, 0);
+                    TakeDamage(ClosestEnemy, baseDamage, PlayerID2,
+                               (DamageInfo2_o*)Save::DamageInfo, weaponID,
+                               firePos, hitPos, paramCheck, nullptr, 0);
 
-            StartonFiring(LocalPlayer, WeaponHand);
+                    StartFiring(LocalPlayer, WeaponHand);
+                    StartWholeBodyFiring(LocalPlayer, WeaponHand);
 
-            lastTime = now;
-            lastInterval = getRandomInterval();
+                    lastDamageTime = now;
+                    damageInterval = getRandomInterval();
+                }
+            }
         }
     } else {
-        lastTime = std::chrono::steady_clock::now() - std::chrono::milliseconds(1000);
-        lastInterval = getRandomInterval();
+        if (isFiring) {
+            StopFire1(LocalPlayer, WeaponHand);
+            isFiring = false;
+        }
+        burstStartTime = std::chrono::steady_clock::now();
+        lastDamageTime = std::chrono::steady_clock::now() - std::chrono::milliseconds(1000);
+        damageInterval = getRandomInterval();
     }
 }
 void StartAimKillSend(void* ClosestEnemy) {

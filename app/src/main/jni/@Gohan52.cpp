@@ -501,7 +501,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 StyledCheckbox(" AIMKILL", &AimKill1);
                 ImGui::Spacing();
                 
-                 StyledCheckbox(" MassKill", &Mass.Sucks);
+                 StyledCheckbox(" TELEPORT 10M (RISK)", &Mass.Sucks);
                 ImGui::Spacing();
                 break;
             case 3:
