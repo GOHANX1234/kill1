@@ -40,6 +40,7 @@ std::string g_Token, g_Auth;
 #include "LoginBYxopun.h"
 
 #include "Fonts.h"
+#include "SpeedBoost.h"
 ImFont* poppins_mediumf = nullptr;
 ImFont* poppins_medium_low = nullptr;
 
@@ -507,18 +508,12 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
             }
             case 1: {
                 StyledCheckbox(" ESP LINE", &Config.ESP.Line);
-                ImGui::Spacing();
                 StyledCheckbox(" ESP BOX", &Config.ESP.Box);
-                ImGui::Spacing();
                 StyledCheckbox(" ESP HEALTH", &Config.ESP.Health);
-                ImGui::Spacing();
-                ImGui::Spacing();
                 
+                ImGui::Dummy(ImVec2(0.0f, 0.0f));
                 ImGui::TextColored(GetMenuColorVec4(1.0f), "ESP COLOUR");
-                ImGui::Spacing();
-                
                 ImGui::Text("ESP Color:");
-                ImGui::Spacing();
                 
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.20f, 0.15f, 0.25f, 1.0f));
@@ -526,16 +521,14 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 ImGui::PushStyleColor(ImGuiCol_SliderGrab, GetMenuColorVec4(1.0f));
                 ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, GetMenuColorVec4(0.86f));
                 
-                ImGui::SetNextItemWidth(250);
+                ImGui::SetNextItemWidth(200);
                 ImGui::SliderFloat("##EspColorR", &g_EspColor.x, 0.0f, 1.0f, "R: %.2f");
-                ImGui::SetNextItemWidth(250);
+                ImGui::SetNextItemWidth(200);
                 ImGui::SliderFloat("##EspColorG", &g_EspColor.y, 0.0f, 1.0f, "G: %.2f");
-                ImGui::SetNextItemWidth(250);
-                ImGui::SliderFloat("##EspColorB", &g_EspColor.z, 0.0f, 1.0f, "B: %.2f");
                 
                 ImGui::PopStyleColor(5);
                 
-                ImGui::Spacing();
+                ImGui::Dummy(ImVec2(0.0f, 8.0f));
                 ImVec2 esp_preview_pos = ImGui::GetCursorScreenPos();
                 ImVec2 esp_preview_size(40, 20);
                 ImDrawList* esp_draw_list = ImGui::GetWindowDrawList();
@@ -545,7 +538,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 esp_draw_list->AddRect(esp_preview_pos, 
                     ImVec2(esp_preview_pos.x + esp_preview_size.x, esp_preview_pos.y + esp_preview_size.y), 
                     IM_COL32(255, 255, 255, 150), 3.0f, 0, 1.0f);
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + esp_preview_size.y + 5);
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + esp_preview_size.y + 3);
                 ImGui::Text("Color Preview");
                 break;
             }
@@ -553,8 +546,21 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 StyledCheckbox(" AIMKILL", &AimKill1);
                 ImGui::Spacing();
                 
-                 StyledCheckbox(" TELEPORT 10M (RISK)", &Mass.Sucks);
+                StyledCheckbox(" TELEPORT 10M (RISK)", &Mass.Sucks);
                 ImGui::Spacing();
+                
+                StyledCheckbox(" SPEED BOOST", &SpeedBoost_Enabled);
+                ImGui::Spacing();
+                
+                ImGui::Text("Speed Multiplier:");
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.20f, 0.15f, 0.25f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.25f, 0.15f, 0.30f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_SliderGrab, GetMenuColorVec4(1.0f));
+                ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, GetMenuColorVec4(0.86f));
+                ImGui::SetNextItemWidth(200);
+                ImGui::SliderFloat("##SpeedMult", &SpeedBoost_Multiplier, 1.0f, 3.0f, "%.1fx");
+                ImGui::PopStyleColor(5);
                 break;
             }
             case 3: {
