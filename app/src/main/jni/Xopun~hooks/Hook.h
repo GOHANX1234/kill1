@@ -32,6 +32,8 @@ typedef char PACKAGENAME;
 #define ICON_FA_SHIELD "\xef\x84\xb2" // U+f132 - Shield/Warrior icon 
 
 float density = -1;
+
+extern ImVec4 g_EspColor;
 struct cfg {
     bool aimbot;
     int aim_type = 0;
@@ -730,7 +732,7 @@ if (Mass.Sucks) {
                          if(get_IsDieing(closestEnemy)) {
                             draw->AddLine(ImVec2(screenWidth / 2, 80), ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35), ImColor(255, 0, 0), 1.7);
                           } else {
-                            draw->AddLine(ImVec2(screenWidth / 2, 80), ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35), ImColor(200, 0, 255), 1.7);
+                            draw->AddLine(ImVec2(screenWidth / 2, 80), ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35), ImColor((int)(g_EspColor.x * 255), (int)(g_EspColor.y * 255), (int)(g_EspColor.z * 255)), 1.7);
                         }
                         
                         }
@@ -753,8 +755,8 @@ if (Mass.Sucks) {
             visual_esp_boxth
         );
     } else {
-        // Full box for alive enemies
-        ImColor color = ImColor(200, 0, 255); // Purple color
+        // Full box for alive enemies with configurable color
+        ImColor color = ImColor((int)(g_EspColor.x * 255), (int)(g_EspColor.y * 255), (int)(g_EspColor.z * 255));
         float thickness = visual_esp_boxth;
 
         draw->AddRect(
