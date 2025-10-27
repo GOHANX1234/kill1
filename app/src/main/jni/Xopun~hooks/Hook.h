@@ -23,6 +23,7 @@
 #include <stdio.h>
 
 #include "XopunAimkill.h"
+#include "../Fly.h"
 inline static int g_GlHeight, g_GlWidth;
 typedef char PACKAGENAME;
 //#include "MemoryPatch.h"
@@ -591,9 +592,9 @@ int totalEnemies = 0;
                 
 if (Player != NULL) {
 
-// Apply Speed Boost feature
-if (SpeedBoost_Enabled) {
-    ApplySpeedBoost(Player);
+// Apply Fly feature
+if (Fly_Enabled) {
+    ApplyFly(Player);
 }
 
 if (Aimbot) {
