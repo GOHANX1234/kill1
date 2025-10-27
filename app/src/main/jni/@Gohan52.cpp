@@ -125,6 +125,7 @@ void *getRealAddr(ulong offset) {
 
 static ImVec4 g_MenuColor = ImVec4(200.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f, 1.0f);
 static bool g_ColorPickerOpen = false;
+ImVec4 g_EspColor = ImVec4(200.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f, 1.0f);
 
 ImU32 GetMenuColor(int alpha = 255) {
     return IM_COL32(
@@ -137,6 +138,19 @@ ImU32 GetMenuColor(int alpha = 255) {
 
 ImVec4 GetMenuColorVec4(float alpha = 1.0f) {
     return ImVec4(g_MenuColor.x, g_MenuColor.y, g_MenuColor.z, alpha);
+}
+
+ImU32 GetEspColor(int alpha = 255) {
+    return IM_COL32(
+        (int)(g_EspColor.x * 255.0f),
+        (int)(g_EspColor.y * 255.0f),
+        (int)(g_EspColor.z * 255.0f),
+        alpha
+    );
+}
+
+ImVec4 GetEspColorVec4(float alpha = 1.0f) {
+    return ImVec4(g_EspColor.x, g_EspColor.y, g_EspColor.z, alpha);
 }
 
 void ApplyMenuTheme() {
@@ -478,7 +492,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
         ImGui::SetCursorPosY(26);
         
         switch (tab) {
-            case 0:
+            case 0: {
                 StyledCheckbox(" ACTIVE FUNCTION", &Enable);
                 ImGui::Spacing();
                 StyledCheckbox(" AIMBOT", &Aimbot);
@@ -490,32 +504,60 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                     OpenURL(Il2CppString::Create("https://t.me/Gohan52"));
                 }
                 break;
-            case 1:
+            }
+            case 1: {
                 StyledCheckbox(" ESP LINE", &Config.ESP.Line);
                 ImGui::Spacing();
                 StyledCheckbox(" ESP BOX", &Config.ESP.Box);
                 ImGui::Spacing();
                 StyledCheckbox(" ESP HEALTH", &Config.ESP.Health);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                
+                ImGui::TextColored(GetMenuColorVec4(1.0f), "ESP COLOUR");
+                ImGui::Spacing();
+                
+                ImGui::Text("ESP Color:");
+                ImGui::Spacing();
+                
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.20f, 0.15f, 0.25f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.25f, 0.15f, 0.30f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_SliderGrab, GetMenuColorVec4(1.0f));
+                ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, GetMenuColorVec4(0.86f));
+                
+                ImGui::SetNextItemWidth(250);
+                ImGui::SliderFloat("##EspColorR", &g_EspColor.x, 0.0f, 1.0f, "R: %.2f");
+                ImGui::SetNextItemWidth(250);
+                ImGui::SliderFloat("##EspColorG", &g_EspColor.y, 0.0f, 1.0f, "G: %.2f");
+                ImGui::SetNextItemWidth(250);
+                ImGui::SliderFloat("##EspColorB", &g_EspColor.z, 0.0f, 1.0f, "B: %.2f");
+                
+                ImGui::PopStyleColor(5);
+                
+                ImGui::Spacing();
+                ImVec2 esp_preview_pos = ImGui::GetCursorScreenPos();
+                ImVec2 esp_preview_size(40, 20);
+                ImDrawList* esp_draw_list = ImGui::GetWindowDrawList();
+                esp_draw_list->AddRectFilled(esp_preview_pos, 
+                    ImVec2(esp_preview_pos.x + esp_preview_size.x, esp_preview_pos.y + esp_preview_size.y), 
+                    GetEspColor(255), 3.0f);
+                esp_draw_list->AddRect(esp_preview_pos, 
+                    ImVec2(esp_preview_pos.x + esp_preview_size.x, esp_preview_pos.y + esp_preview_size.y), 
+                    IM_COL32(255, 255, 255, 150), 3.0f, 0, 1.0f);
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + esp_preview_size.y + 5);
+                ImGui::Text("Color Preview");
                 break;
-            case 2:
+            }
+            case 2: {
                 StyledCheckbox(" AIMKILL", &AimKill1);
                 ImGui::Spacing();
                 
                  StyledCheckbox(" TELEPORT 10M (RISK)", &Mass.Sucks);
                 ImGui::Spacing();
                 break;
-            case 3:
-                ImGui::TextColored(GetMenuColorVec4(1.0f), "DEXXTER MOD APK V1");
-                ImGui::Spacing();
-                ImGui::Text("Developed by @Gohan52");
-                ImGui::Spacing();
-                ImGui::TextWrapped("Premium mod menu with advanced features.");
-                ImGui::Spacing();
-                ImGui::Spacing();
-                
-                ImGui::Separator();
-                ImGui::Spacing();
-                
+            }
+            case 3: {
                 ImGui::TextColored(GetMenuColorVec4(1.0f), "MENU COLOUR");
                 ImGui::Spacing();
                 
@@ -543,10 +585,10 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 
                 if (g_ColorPickerOpen) {
                     ImGui::Spacing();
-                    ImGui::SetNextItemWidth(300);
+                    ImGui::SetNextItemWidth(180);
                     if (ImGui::ColorPicker4("##MenuColorPicker", (float*)&g_MenuColor, 
                         ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview | 
-                        ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_PickerHueWheel)) {
+                        ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_NoInputs)) {
                         ApplyMenuTheme();
                     }
                     
@@ -572,6 +614,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 ImGui::Spacing();
                 ImGui::Text("Tap 'Pick Color' to customize theme!");
                 break;
+            }
         }
 
         ImGui::EndChild();
