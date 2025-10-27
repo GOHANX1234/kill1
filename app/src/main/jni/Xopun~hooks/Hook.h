@@ -590,6 +590,12 @@ void _LateUpdate(void *Player){
 int totalEnemies = 0; 
                 
 if (Player != NULL) {
+
+// Apply Speed Boost feature
+if (SpeedBoost_Enabled) {
+    ApplySpeedBoost(Player);
+}
+
 if (Aimbot) {
 
 
