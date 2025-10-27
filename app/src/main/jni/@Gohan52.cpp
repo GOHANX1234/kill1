@@ -40,7 +40,6 @@ std::string g_Token, g_Auth;
 #include "LoginBYxopun.h"
 
 #include "Fonts.h"
-#include "SpeedBoost.h"
 ImFont* poppins_mediumf = nullptr;
 ImFont* poppins_medium_low = nullptr;
 
