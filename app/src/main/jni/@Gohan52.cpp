@@ -38,6 +38,7 @@ using json = nlohmann::json;
 time_t rng = 0;
 std::string g_Token, g_Auth;
 #include "LoginBYxopun.h"
+#include "Fly.h"
 
 #include "Fonts.h"
 ImFont* poppins_mediumf = nullptr;
@@ -512,7 +513,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 
                 ImGui::Dummy(ImVec2(0.0f, 0.0f));
                 ImGui::TextColored(GetMenuColorVec4(1.0f), "ESP COLOUR");
-                ImGui::Text("ESP Color:");
+                ImGui::Spacing();
                 
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.20f, 0.15f, 0.25f, 1.0f));
@@ -520,25 +521,13 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 ImGui::PushStyleColor(ImGuiCol_SliderGrab, GetMenuColorVec4(1.0f));
                 ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, GetMenuColorVec4(0.86f));
                 
-                ImGui::SetNextItemWidth(200);
+                ImGui::SetNextItemWidth(230);
                 ImGui::SliderFloat("##EspColorR", &g_EspColor.x, 0.0f, 1.0f, "R: %.2f");
-                ImGui::SetNextItemWidth(200);
+                ImGui::SameLine(0, 10);
+                ImGui::SetNextItemWidth(230);
                 ImGui::SliderFloat("##EspColorG", &g_EspColor.y, 0.0f, 1.0f, "G: %.2f");
                 
                 ImGui::PopStyleColor(5);
-                
-                ImGui::Dummy(ImVec2(0.0f, 8.0f));
-                ImVec2 esp_preview_pos = ImGui::GetCursorScreenPos();
-                ImVec2 esp_preview_size(40, 20);
-                ImDrawList* esp_draw_list = ImGui::GetWindowDrawList();
-                esp_draw_list->AddRectFilled(esp_preview_pos, 
-                    ImVec2(esp_preview_pos.x + esp_preview_size.x, esp_preview_pos.y + esp_preview_size.y), 
-                    GetEspColor(255), 3.0f);
-                esp_draw_list->AddRect(esp_preview_pos, 
-                    ImVec2(esp_preview_pos.x + esp_preview_size.x, esp_preview_pos.y + esp_preview_size.y), 
-                    IM_COL32(255, 255, 255, 150), 3.0f, 0, 1.0f);
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + esp_preview_size.y + 3);
-                ImGui::Text("Color Preview");
                 break;
             }
             case 2: {
@@ -548,17 +537,21 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 StyledCheckbox(" TELEPORT 10M (RISK)", &Mass.Sucks);
                 ImGui::Spacing();
                 
-                StyledCheckbox(" SPEED BOOST", &SpeedBoost_Enabled);
+                StyledCheckbox(" FLY MODE", &Fly_Enabled);
                 ImGui::Spacing();
                 
-                ImGui::Text("Speed Multiplier:");
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.20f, 0.15f, 0.25f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.25f, 0.15f, 0.30f, 1.0f));
                 ImGui::PushStyleColor(ImGuiCol_SliderGrab, GetMenuColorVec4(1.0f));
                 ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, GetMenuColorVec4(0.86f));
-                ImGui::SetNextItemWidth(200);
-                ImGui::SliderFloat("##SpeedMult", &SpeedBoost_Multiplier, 1.0f, 3.0f, "%.1fx");
+                
+                ImGui::SetNextItemWidth(230);
+                ImGui::SliderFloat("##FlyHeight", &Fly_Height, 1.0f, 10.0f, "Height: %.1f");
+                ImGui::SameLine(0, 10);
+                ImGui::SetNextItemWidth(230);
+                ImGui::SliderFloat("##FlySpeed", &Fly_Speed, 5.0f, 20.0f, "Speed: %.1f");
+                
                 ImGui::PopStyleColor(5);
                 break;
             }
