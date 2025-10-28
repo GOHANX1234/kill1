@@ -23,7 +23,6 @@
 #include <stdio.h>
 
 #include "XopunAimkill.h"
-#include "../Fly.h"
 inline static int g_GlHeight, g_GlWidth;
 typedef char PACKAGENAME;
 //#include "MemoryPatch.h"
@@ -585,17 +584,12 @@ void _DarkUpdateX(void *player) {
         }
 }
 
-void (*LateUpdate)(void *Player);
-void _LateUpdate(void *Player){
+void (*LateUpdate)(void *Player, void *param);
+void _LateUpdate(void *Player, void *param){
         
 int totalEnemies = 0; 
                 
 if (Player != NULL) {
-
-// Apply Fly feature
-if (Fly_Enabled) {
-    ApplyFly(Player);
-}
 
 if (Aimbot) {
 
@@ -650,7 +644,7 @@ if (closestEnemy != NULL && LocalPlayer != NULL && CurrentMatch != NULL) {
   }
   }
   }
-  LateUpdate(Player);
+  LateUpdate(Player, param);
 }
 void (*orig_mrSilentAim)(void *, float, float);
 void hook_mrAimSilent(void *_this, float a1, float a2) {

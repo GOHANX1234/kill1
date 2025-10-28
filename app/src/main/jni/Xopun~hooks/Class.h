@@ -184,7 +184,6 @@ static Quaternion GetRotation(void* player) {
 
 
 #define offset_SkillDenger (uintptr_t) Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("message"), OBFUSCATE("OHEFCABNAII"), OBFUSCATE(".ctor"), 0)
-#define offset_FlyS2c (uintptr_t) Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("message"), OBFUSCATE("ENLFMIDMHGP"), OBFUSCATE("Serialize"), 1)
 
 
 
