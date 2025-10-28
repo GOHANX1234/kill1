@@ -537,7 +537,12 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 StyledCheckbox(" TELEPORT 10M (RISK)", &Mass.Sucks);
                 ImGui::Spacing();
                 
-                StyledCheckbox(" FLY MODE", &Fly_Enabled);
+                StyledCheckbox(" FLY MODE (CS BYPASS)", &Fly_Enabled);
+                ImGui::SameLine(0, 10);
+                StyledCheckbox(" AUTO-ASCEND", &Fly_AutoAscend);
+                ImGui::Spacing();
+                
+                StyledCheckbox(" LOCK HEIGHT", &Fly_StayAtHeight);
                 ImGui::Spacing();
                 
                 ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
@@ -547,12 +552,34 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, GetMenuColorVec4(0.86f));
                 
                 ImGui::SetNextItemWidth(230);
-                ImGui::SliderFloat("##FlyHeight", &Fly_Height, 1.0f, 10.0f, "Height: %.1f");
+                ImGui::SliderFloat("##FlyHeight", &Fly_Height, 0.5f, 5.0f, "Jump Power: %.1f");
                 ImGui::SameLine(0, 10);
                 ImGui::SetNextItemWidth(230);
-                ImGui::SliderFloat("##FlySpeed", &Fly_Speed, 5.0f, 20.0f, "Speed: %.1f");
+                ImGui::SliderFloat("##FlySpeed", &Fly_Speed, 3.0f, 15.0f, "Speed: %.1f");
                 
                 ImGui::PopStyleColor(5);
+                
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Manual Controls:");
+                
+                ImGui::PushStyleColor(ImGuiCol_Button, GetMenuColorVec4(1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, GetMenuColorVec4(0.8f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, GetMenuColorVec4(0.9f));
+                
+                ImGui::Button(" UP ", ImVec2(100, 30));
+                Fly_UserWantsUp = ImGui::IsItemActive(); // True while button is held
+                
+                ImGui::SameLine(0, 10);
+                
+                ImGui::Button(" DOWN ", ImVec2(100, 30));
+                Fly_UserWantsDown = ImGui::IsItemActive(); // True while button is held
+                
+                ImGui::PopStyleColor(3);
+                
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Fly moves in direction you're looking while walking");
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Hold UP/DOWN buttons to ascend/descend manually");
+                
                 break;
             }
             case 3: {
@@ -591,9 +618,18 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                     }
                     
                     ImGui::Spacing();
+                    
+                    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
+                    ImGui::PushStyleColor(ImGuiCol_Button, GetMenuColorVec4(1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, GetMenuColorVec4(0.8f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, GetMenuColorVec4(0.9f));
+                    
                     if (ImGui::Button("Close", ImVec2(120, 30))) {
                         g_ColorPickerOpen = false;
                     }
+                    
+                    ImGui::PopStyleColor(3);
+                    ImGui::PopStyleVar();
                     
                     if (ImGui::IsMouseClicked(0)) {
                         ImVec2 mouse_pos = ImGui::GetMousePos();
@@ -608,9 +644,6 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                         }
                     }
                 }
-                
-                ImGui::Spacing();
-                ImGui::Text("Tap 'Pick Color' to customize theme!");
                 break;
             }
         }
@@ -786,8 +819,17 @@ bool is_current_process(const char* target_name) {
     return strcmp(cmdline, target_name) == 0;
 }
 
-
-
+// ===== PLAYER UPDATE HOOK FOR FLY SYSTEM =====
+void (*LateUpdate)(void *player, int param);
+void _LateUpdate(void *player, int param) {
+    if (player != nullptr) {
+        // Call the new advanced fly system
+        ApplyAdvancedFly(player);
+    }
+    
+    // Call original function
+    return LateUpdate(player, param);
+}
 
 void hack_injec() {
         while (!unityMap.isValid()) {
