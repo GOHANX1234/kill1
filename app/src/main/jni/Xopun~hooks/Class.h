@@ -5,6 +5,46 @@
 #include <sstream>
 #include <iostream>
 #include<sstream>
+// ==================== MEMORY ADDRESS FUNCTIONS ====================
+#define getRealOffset(offset) AgetAbsoluteAddress("libil2cpp.so",offset)
+
+static uintptr_t libBase;
+bool isGameLibLoaded = false;
+
+long AfindLibrary(const char *library) {
+    char filename[0xFF] = {0},
+    buffer[1024] = {0};
+    FILE *fp = NULL;
+    long address = 0;
+    sprintf(filename, OBFUSCATE("/proc/self/maps"));
+    fp = fopen(filename, OBFUSCATE("rt"));
+    if (fp == NULL) {
+        perror(OBFUSCATE("fopen"));
+        goto done;
+    }
+    while (fgets(buffer, sizeof(buffer), fp)) {
+        if (strstr(buffer, library)) {
+            address = (long) strtoul(buffer, NULL, 16);
+            goto done;
+        }
+    }
+    done:
+    if (fp) {
+        fclose(fp);
+    }
+    return address;
+}
+
+long AClibBase;
+long AgetAbsoluteAddress(const char* libraryName, long relativeAddr) {
+    if (AClibBase == 0) {
+        AClibBase = AfindLibrary(libraryName);
+        if (AClibBase == 0) {
+            AClibBase = 0;
+        }
+    }
+    return AClibBase + relativeAddr;
+}
 
 class Vvector3 {
 public:
